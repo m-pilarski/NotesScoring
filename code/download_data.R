@@ -1,4 +1,4 @@
-.data_dir <- "~/Documents/Research/NoteScoring/data/"
+.data_dir <- "~/Documents/Research/NotesScoring/data/"
 
 download_dataset <- function(.dataset, .date, .chunk, .data_dir){
   
@@ -41,7 +41,7 @@ download_dataset <- function(.dataset, .date, .chunk, .data_dir){
     
     .resp_full |> 
       httr2::resp_body_raw() |> 
-      readr::write_file(path=.data_path_local)
+      readr::write_file(file=.data_path_local)
     
   }
   

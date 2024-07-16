@@ -71,6 +71,7 @@ renv::init(project=path_proj, restart=FALSE, bare=TRUE)
 
 renv::hydrate(project=path_proj, prompt=FALSE)
 
+if(!"reticulate" %in% installed.packages()){install.packages("reticulate")}
 if(fs::dir_exists(path_conda_env)){fs::dir_delete(path_conda_env)}
 reticulate::conda_create(
   envname=path_conda_env, conda=path_conda_lib_exe, python_version="3.9"
