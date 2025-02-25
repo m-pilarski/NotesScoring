@@ -1,15 +1,13 @@
-.data_dir <- "~/Documents/Research/NotesScoring/data/"
-
 download_dataset <- function(.dataset, .date, .chunk, .data_dir){
   
-  .dataset <<- .dataset
-  .date <<- .date
-  .chunk <<- .chunk
-  .data_dir <<- .data_dir
+  # .dataset <<- .dataset
+  # .date <<- .date
+  # .chunk <<- .chunk
+  # .data_dir <<- .data_dir
   
   stopifnot(
     .dataset %in% c("notes", "ratings", "noteStatusHistory", "userEnrollment"),
-    lubridate::is.POSIXct(.date),
+    lubridate::is.POSIXct(.date) | lubridate::is.Date(.date),
     is.numeric(.chunk) & .chunk < 100000
   )
   
@@ -31,6 +29,8 @@ download_dataset <- function(.dataset, .date, .chunk, .data_dir){
     httr2::req_error(is_error = \(...){FALSE}) |>
     httr2::req_perform()
   
+  message(.resp_full$url)
+  
   .resp_status <- httr2::resp_status(.resp_full)
   
   if(.resp_status == 200){
@@ -50,18 +50,40 @@ download_dataset <- function(.dataset, .date, .chunk, .data_dir){
 }
 
 download_database <- function(.date=Sys.time(), .data_dir=.data_dir){
+
   .dataset_vec <- c("notes", "ratings", "noteStatusHistory", "userEnrollment")
+  .first_all <- TRUE
+  
   for(.dataset in .dataset_vec){
+    
     .chunk <- 0
     repeat{
       .download_status <- download_dataset(
         .dataset=.dataset, .date=.date, .chunk=.chunk, .data_dir=.data_dir
       )
-      if(.download_status != 200){break}
+      if(.first_all && .download_status == 404){
+        .date <- .date - lubridate::days(1)
+        message("reduced .date by one day")
+        next
+      }else if(.download_status != 200){
+        if(.chunk == 0){
+          message("failed to download ", .dataset, " (", .download_status, ")")
+          stop()
+        }else{
+          break
+        }
+      }
+      .first_all <- FALSE
       .chunk <- .chunk + 1
     }
+
   }
-  fs::dir_tree(.data_dir)
+
+  print(fs::dir_tree(.data_dir))
+
 }
 
-download_database(.date=Sys.time(), .data_dir=.data_dir)
+download_database(
+  .date=lubridate::ymd("2024-06-16"), 
+  .data_dir=here::here("data")
+)

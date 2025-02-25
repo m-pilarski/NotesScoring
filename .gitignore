@@ -4,5 +4,7 @@
 .Ruserdata
 .Rprofile
 .Renviron
-libs/
+venv/
+renv/
 data/
+data-2024-06-14/
